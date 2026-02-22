@@ -1,0 +1,45 @@
+# ------------------------------------------------------------
+# Docker Compose - Database (Development Only)
+# ------------------------------------------------------------
+# This file runs a local PostgreSQL instance for development.
+# Do not use in production.
+#
+# Basic commands:
+# Start:        docker compose -f docker-compose.db.yml up -d
+# Stop:         docker compose -f docker-compose.db.yml down
+# Reset data:   docker compose -f docker-compose.db.yml down -v
+# View logs:    docker compose -f docker-compose.db.yml logs -f
+#
+# Connection details:
+# Host:     localhost
+# Port:     5432
+# Database: assetguard
+# User:     postgres
+# Password: postgres
+#
+# Notes:
+# - Data is persisted in the "assetguard-data" volume
+# - Change port if 5432 is already in use
+# - Ensure Docker is running before starting
+# ------------------------------------------------------------
+
+services:
+  assetguard-db:
+    image: postgres:17-alpine
+    container_name: assetguard-postgres
+    environment:
+      POSTGRES_DB: assetguard
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - assetguard-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asset -d assetguard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  assetguard-data:
