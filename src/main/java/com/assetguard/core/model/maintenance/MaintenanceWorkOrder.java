@@ -15,33 +15,55 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 @Entity
 @Table(name = "maintenance_work_orders")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+@ToString(callSuper = true)
 public class MaintenanceWorkOrder extends AuditMetadata {
 
     @Id
     @UuidGenerator
     @Column(name = "id")
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "asset_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Asset asset;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "reported_by_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User reportedBy;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "technician_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User technician;
 
     @Column(name = "issue_description", nullable = false, columnDefinition = "TEXT")
     private String issueDescription;
 
     @Column(name = "intervention_cost", nullable = false, precision = 10, scale = 2)
+    @Builder.Default
     private BigDecimal interventionCost = BigDecimal.ZERO;
 
     @Column(name = "start_date")
@@ -52,77 +74,6 @@ public class MaintenanceWorkOrder extends AuditMetadata {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
+    @Builder.Default
     private WorkOrderStatus status = WorkOrderStatus.OPEN;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public Asset getAsset() {
-        return asset;
-    }
-
-    public void setAsset(Asset asset) {
-        this.asset = asset;
-    }
-
-    public User getReportedBy() {
-        return reportedBy;
-    }
-
-    public void setReportedBy(User reportedBy) {
-        this.reportedBy = reportedBy;
-    }
-
-    public User getTechnician() {
-        return technician;
-    }
-
-    public void setTechnician(User technician) {
-        this.technician = technician;
-    }
-
-    public String getIssueDescription() {
-        return issueDescription;
-    }
-
-    public void setIssueDescription(String issueDescription) {
-        this.issueDescription = issueDescription;
-    }
-
-    public BigDecimal getInterventionCost() {
-        return interventionCost;
-    }
-
-    public void setInterventionCost(BigDecimal interventionCost) {
-        this.interventionCost = interventionCost;
-    }
-
-    public Instant getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Instant startDate) {
-        this.startDate = startDate;
-    }
-
-    public Instant getCompletionDate() {
-        return completionDate;
-    }
-
-    public void setCompletionDate(Instant completionDate) {
-        this.completionDate = completionDate;
-    }
-
-    public WorkOrderStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(WorkOrderStatus status) {
-        this.status = status;
-    }
 }
