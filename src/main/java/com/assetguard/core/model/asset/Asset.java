@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 @Entity
 @Table(name = "assets")
@@ -32,6 +33,7 @@ public class Asset extends AuditMetadata {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "model_id", nullable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private AssetModel model;
 
     @Column(name = "asset_tag", nullable = false, unique = true)
