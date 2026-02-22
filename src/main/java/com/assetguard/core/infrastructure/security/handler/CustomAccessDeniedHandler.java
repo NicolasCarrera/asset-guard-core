@@ -1,7 +1,6 @@
 package com.assetguard.core.infrastructure.security.handler;
 
 import com.assetguard.core.dto.shared.ErrorResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -10,12 +9,13 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.json.JsonMapper;
 
 @Component
 @RequiredArgsConstructor
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     @Override
     public void handle(
@@ -30,6 +30,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 "FORBIDDEN", "Access denied", accessDeniedException.getMessage());
 
-        objectMapper.writeValue(response.getOutputStream(), errorResponse);
+        jsonMapper.writeValue(response.getOutputStream(), errorResponse);
     }
 }
