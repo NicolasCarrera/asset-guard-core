@@ -11,19 +11,36 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 @Entity
 @Table(name = "locations")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class Location {
 
     @Id
     @UuidGenerator
     @Column(name = "id")
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "parent_location_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Location parentLocation;
 
     @Column(name = "name", nullable = false)
@@ -35,45 +52,6 @@ public class Location {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "record_status", nullable = false)
+    @Builder.Default
     private RecordStatus recordStatus = RecordStatus.ACTIVE;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public Location getParentLocation() {
-        return parentLocation;
-    }
-
-    public void setParentLocation(Location parentLocation) {
-        this.parentLocation = parentLocation;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocationType getType() {
-        return type;
-    }
-
-    public void setType(LocationType type) {
-        this.type = type;
-    }
-
-    public RecordStatus getRecordStatus() {
-        return recordStatus;
-    }
-
-    public void setRecordStatus(RecordStatus recordStatus) {
-        this.recordStatus = recordStatus;
-    }
 }
