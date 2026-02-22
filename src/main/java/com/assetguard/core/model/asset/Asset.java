@@ -13,6 +13,9 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
+
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
@@ -20,6 +23,8 @@ import org.hibernate.envers.RelationTargetAuditMode;
 @Entity
 @Table(name = "assets")
 @Audited
+@Getter
+@Setter
 public class Asset extends AuditMetadata {
 
     @Id
@@ -55,75 +60,4 @@ public class Asset extends AuditMetadata {
     @Column(name = "lifecycle_status", nullable = false)
     private LifecycleStatus lifecycleStatus = LifecycleStatus.AVAILABLE;
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public Asset getParentAsset() {
-        return parentAsset;
-    }
-
-    public void setParentAsset(Asset parentAsset) {
-        this.parentAsset = parentAsset;
-    }
-
-    public AssetModel getModel() {
-        return model;
-    }
-
-    public void setModel(AssetModel model) {
-        this.model = model;
-    }
-
-    public String getAssetTag() {
-        return assetTag;
-    }
-
-    public void setAssetTag(String assetTag) {
-        this.assetTag = assetTag;
-    }
-
-    public String getSerialNumber() {
-        return serialNumber;
-    }
-
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
-    }
-
-    public LocalDate getPurchaseDate() {
-        return purchaseDate;
-    }
-
-    public void setPurchaseDate(LocalDate purchaseDate) {
-        this.purchaseDate = purchaseDate;
-    }
-
-    public BigDecimal getPurchaseCost() {
-        return purchaseCost;
-    }
-
-    public void setPurchaseCost(BigDecimal purchaseCost) {
-        this.purchaseCost = purchaseCost;
-    }
-
-    public BigDecimal getResidualValue() {
-        return residualValue;
-    }
-
-    public void setResidualValue(BigDecimal residualValue) {
-        this.residualValue = residualValue;
-    }
-
-    public LifecycleStatus getLifecycleStatus() {
-        return lifecycleStatus;
-    }
-
-    public void setLifecycleStatus(LifecycleStatus lifecycleStatus) {
-        this.lifecycleStatus = lifecycleStatus;
-    }
 }
