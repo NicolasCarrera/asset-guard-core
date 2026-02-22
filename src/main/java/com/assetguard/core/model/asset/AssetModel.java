@@ -9,15 +9,30 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 @Entity
 @Table(name = "asset_models")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class AssetModel {
 
     @Id
     @UuidGenerator
     @Column(name = "id")
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @Enumerated(EnumType.STRING)
@@ -35,53 +50,6 @@ public class AssetModel {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "record_status", nullable = false)
+    @Builder.Default
     private RecordStatus recordStatus = RecordStatus.ACTIVE;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public AssetCategory getCategory() {
-        return category;
-    }
-
-    public void setCategory(AssetCategory category) {
-        this.category = category;
-    }
-
-    public String getManufacturer() {
-        return manufacturer;
-    }
-
-    public void setManufacturer(String manufacturer) {
-        this.manufacturer = manufacturer;
-    }
-
-    public String getModelName() {
-        return modelName;
-    }
-
-    public void setModelName(String modelName) {
-        this.modelName = modelName;
-    }
-
-    public Integer getDepreciationYears() {
-        return depreciationYears;
-    }
-
-    public void setDepreciationYears(Integer depreciationYears) {
-        this.depreciationYears = depreciationYears;
-    }
-
-    public RecordStatus getRecordStatus() {
-        return recordStatus;
-    }
-
-    public void setRecordStatus(RecordStatus recordStatus) {
-        this.recordStatus = recordStatus;
-    }
 }
