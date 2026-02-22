@@ -10,80 +10,54 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 @Entity
 @Table(name = "asset_location_logs")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class AssetLocationLog {
 
     @Id
     @UuidGenerator
     @Column(name = "id")
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "asset_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Asset asset;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "location_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Location location;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "transferred_by_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User transferredBy;
 
     @Column(name = "arrival_date", nullable = false)
+    @Builder.Default
     private Instant arrivalDate = Instant.now();
 
     @Column(name = "departure_date")
     private Instant departureDate;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public Asset getAsset() {
-        return asset;
-    }
-
-    public void setAsset(Asset asset) {
-        this.asset = asset;
-    }
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
-    public User getTransferredBy() {
-        return transferredBy;
-    }
-
-    public void setTransferredBy(User transferredBy) {
-        this.transferredBy = transferredBy;
-    }
-
-    public Instant getArrivalDate() {
-        return arrivalDate;
-    }
-
-    public void setArrivalDate(Instant arrivalDate) {
-        this.arrivalDate = arrivalDate;
-    }
-
-    public Instant getDepartureDate() {
-        return departureDate;
-    }
-
-    public void setDepartureDate(Instant departureDate) {
-        this.departureDate = departureDate;
-    }
 }
