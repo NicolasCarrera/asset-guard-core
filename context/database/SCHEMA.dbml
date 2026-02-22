@@ -1,0 +1,166 @@
+Project EAM_ITAM_System {
+  database_type: 'PostgreSQL'
+  Note: 'Esquema normalizado 3NF para Gestión de Activos Fijos (EAM/ITAM)'
+}
+
+Table users {
+  id uuid [pk, note: 'Primary key, UUID v4']
+  employee_id varchar [unique, not null]
+  full_name varchar [not null]
+  email varchar [unique, not null]
+  department varchar
+  role varchar [note: 'ADMIN, MANAGER, TECHNICIAN, EMPLOYEE']
+  record_status varchar [default: 'ACTIVE', note: 'ACTIVE, INACTIVE - Prevents hard delete (RNI-05)']
+  created_at timestamp [default: `now()`]
+  
+  Note: 'Usuarios, empleados y técnicos del sistema'
+}
+
+Table locations {
+  id uuid [pk, note: 'Primary key, UUID v4']
+  parent_location_id uuid [note: 'Self-referencing FK for hierarchical locations']
+  name varchar [not null]
+  type varchar [note: 'WAREHOUSE, OFFICE, PARKING, REMOTE']
+  record_status varchar [default: 'ACTIVE']
+  
+  Note: 'Ubicaciones físicas jerárquicas'
+}
+
+Table asset_models {
+  id uuid [pk, note: 'Primary key, UUID v4']
+  category varchar [not null, note: 'IT_HARDWARE, VEHICLE, MACHINERY']
+  manufacturer varchar [not null]
+  model_name varchar [not null]
+  depreciation_years int [not null, note: 'Años de vida útil para cálculos financieros']
+  record_status varchar [default: 'ACTIVE']
+  
+  Note: 'Catálogo base de modelos de activos para evitar redundancia de texto'
+}
+
+Table assets {
+  id uuid [pk, note: 'Primary key, UUID v4']
+  parent_asset_id uuid [note: 'Permite asignar este activo como componente de otro (RNI-02)']
+  model_id uuid [not null]
+  
+  // Identidad
+  asset_tag varchar [unique, not null, note: 'Internal Corporate ID (RNI-01)']
+  serial_number varchar [unique, note: 'Manufacturer VIN/IMEI/Serial (RNI-01)']
+  
+  // Finanzas Base (Inmutable)
+  purchase_date date [not null]
+  purchase_cost decimal(10,2) [not null, note: 'Costo base original. No se modifica con mejoras.']
+  residual_value decimal(10,2) [not null, default: 0, note: 'Suelo de depreciación (RNI-09)']
+  
+  // Estado
+  lifecycle_status varchar [not null, default: 'AVAILABLE', note: 'AVAILABLE, PENDING_ACCEPTANCE, ASSIGNED, MAINTENANCE, CRITICAL_FAILURE, DISPOSED, VOIDED (RNI-05, RNI-06, RNI-07)']
+  
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+  
+  Note: 'Registro principal del activo. Custodia y ubicación se manejan en tablas log para cumplir 3NF.'
+}
+
+// ==========================================
+// TRACKING & CHAIN OF RESPONSIBILITY
+// ==========================================
+
+Table asset_location_logs {
+  id uuid [pk, note: 'Primary key, UUID v4']
+  asset_id uuid [not null]
+  location_id uuid [not null]
+  transferred_by_id uuid [not null, note: 'Usuario que registró el movimiento']
+  arrival_date timestamp [default: `now()`, not null]
+  departure_date timestamp [note: 'Null significa que es la ubicación actual']
+  
+  Note: 'Historial de movimientos físicos del activo, independiente de su custodio'
+}
+
+Table custody_logs {
+  id uuid [pk, note: 'Primary key, UUID v4']
+  asset_id uuid [not null]
+  assigned_by_id uuid [not null]
+  custodian_id uuid [not null]
+  
+  checkout_date timestamp [default: `now()`, not null]
+  checkout_condition varchar [not null, note: 'NEW, GOOD, FAIR, DAMAGED']
+  
+  acceptance_date timestamp [note: 'Fecha en que el usuario aceptó (RNI-04)']
+  signature_hash varchar [note: 'Firma digital o hash de aceptación']
+  
+  checkin_date timestamp [note: 'Fecha de devolución (RNI-03)']
+  checkin_condition varchar
+  
+  status varchar [default: 'PENDING', note: 'PENDING (esperando firma), ACTIVE (en uso), COMPLETED (devuelto)']
+  
+  Note: 'Fuente única de verdad para la asignación y cadena de custodia (RNI-03)'
+}
+
+// ==========================================
+// MAINTENANCE & CAPITALIZATIONS
+// ==========================================
+
+Table maintenance_work_orders {
+  id uuid [pk, note: 'Primary key, UUID v4']
+  asset_id uuid [not null]
+  reported_by_id uuid [not null]
+  technician_id uuid [not null]
+  
+  issue_description text [not null]
+  intervention_cost decimal(10,2) [not null, default: 0]
+  
+  start_date timestamp
+  completion_date timestamp
+  
+  status varchar [default: 'OPEN', note: 'OPEN, IN_PROGRESS, RESOLVED, CANCELLED']
+  created_at timestamp [default: `now()`]
+  
+  Note: 'Bitácora de intervenciones preventivas y correctivas (RNI-08)'
+}
+
+Table asset_capitalizations {
+  id uuid [pk, note: 'Primary key, UUID v4']
+  asset_id uuid [not null]
+  work_order_id uuid [note: 'Opcional. Vincula la mejora a un mantenimiento específico.']
+  amount decimal(10,2) [not null, note: 'Monto que incrementa el valor del activo (RNI-10)']
+  description varchar [not null]
+  applied_date date [not null]
+  
+  Note: 'Historial de mejoras que aumentan la vida útil o valor del activo padre sin alterar purchase_cost (RNI-10)'
+}
+
+// ==========================================
+// AUDIT TRAIL
+// ==========================================
+
+Table system_audit_logs {
+  id uuid [pk, note: 'Primary key, UUID v4']
+  table_name varchar [not null]
+  record_id uuid [not null]
+  action varchar [not null, note: 'INSERT, UPDATE, SOFT_DELETE']
+  changed_by_id uuid [not null]
+  old_values json [note: 'Snapshot estado previo']
+  new_values json [note: 'Snapshot estado nuevo']
+  timestamp timestamp [default: `now()`, not null]
+  
+  Note: 'Registro inmutable de toda manipulación de datos (RNI-05)'
+}
+
+// ==========================================
+// FOREIGN KEY RELATIONSHIPS
+// ==========================================
+
+Ref: locations.parent_location_id > locations.id
+Ref: assets.model_id > asset_models.id
+Ref: assets.parent_asset_id > assets.id
+Ref: asset_location_logs.asset_id > assets.id
+Ref: asset_location_logs.location_id > locations.id
+Ref: asset_location_logs.transferred_by_id > users.id
+Ref: custody_logs.asset_id > assets.id
+Ref: custody_logs.assigned_by_id > users.id
+Ref: custody_logs.custodian_id > users.id
+Ref: maintenance_work_orders.asset_id > assets.id
+Ref: maintenance_work_orders.reported_by_id > users.id
+Ref: maintenance_work_orders.technician_id > users.id
+Ref: asset_capitalizations.asset_id > assets.id
+Ref: asset_capitalizations.work_order_id > maintenance_work_orders.id
+Ref: system_audit_logs.changed_by_id > users.id
