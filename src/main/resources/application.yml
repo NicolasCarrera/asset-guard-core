@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: asset-guard-core
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/assetguard}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
